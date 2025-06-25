@@ -4,16 +4,24 @@
 - `0625_EDA1.ipynb`:
      배당 및 조정 종가 관련 EDA 실험 노트북
 
-     본 실험에서는 Apple 종목을 기준으로 yfinance 데이터를 활용하여 다음을 실험하였습니다:
+     Apple 주식 데이터를 기반으로 yfinance의 auto_adjust 설정에 따라
+     배당락(Dividends) 및 액면분할(Splits) 발생 시 종가 변화가 어떻게 보정되는지 실험함
 
-     - 배당금 지급일에 실제 주가(`Close`)가 얼마나 하락하는지
-     - `auto_adjust` 설정 유무에 따른 주가 조정 방식 차이
-     - `Adj Close`의 조정 범위 및 의미 해석
-     - `Dividends` 컬럼의 예측 피처로서의 적절성 판단
+     배당일 전후의 Close, Adj Close, Dividends 값을 비교하여
+     조정 주가의 해석 방식과 실제 반영 효과를 시각적으로 검토
 
-     하지만 검색 결과 auto_adjust=True 가 기본값이고
-     별 다른 변수 조절없이 그냥 있는대로 close 등을 사용하면 되겠습니다.
-     
+     ✅ 실험 결과 요약
+     auto_adjust=True일 경우,
 
-     결론적으로 본 프로젝트에서는 `Close`(auto_adjust=True는 자동으로 Close가 Adj Close)를 사용하고,
-     `Dividends` 컬럼은 분석 참고용으로만 활용하거나, 추후 종목별 기술적 지표 심화에 사용하면 좋을거 같습니다.
+     Close는 이미 Adj Close로 보정되어 제공됨
+
+     배당/분할 이벤트로 인한 급격한 주가 변동이 제거되어 시계열 예측에 적합
+
+     따라서 Close만으로도 안정적인 예측 학습이 가능하며
+     Dividends, Stock Splits 컬럼은 별도 보정 없이도 제외 가능
+
+     📌 프로젝트 방침
+     본 프로젝트에서는 yfinance 기본 설정(auto_adjust=True)을 그대로 사용
+
+     Close 컬럼을 예측 대상 및 피처로 사용하며,
+     Dividends, Splits는 필요 시 참고용으로만 활용
