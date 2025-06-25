@@ -16,4 +16,3 @@ class StockPredictionModel:
         predictions = {}
 
         return  predictions
-
