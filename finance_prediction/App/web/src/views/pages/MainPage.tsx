@@ -8,39 +8,75 @@ interface MainPageProps {
 
 const MainPage: React.FC<MainPageProps> = ({ onStockSelect }) => {
     return (
-        <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-900 dark:to-gray-800 p-6">
-            <div className="max-w-6xl mx-auto space-y-12">
+        <div className="min-h-screen relative">
+            <style>{`
+                @keyframes fade-in-up {
+                    from {
+                        opacity: 0;
+                        transform: translateY(30px);
+                    }
+                    to {
+                        opacity: 1;
+                        transform: translateY(0);
+                    }
+                }
+                .animate-fade-in-up {
+                    animation: fade-in-up 0.6s ease-out forwards;
+                }
+                .animate-title {
+                    animation: fade-in-up 0.8s ease-out 0.2s forwards;
+                }
+            `}</style>
 
-                <div className="bg-red-500 text-white p-4 mb-4">
-                    Tailwind 테스트 - 이 박스가 빨간색이면 Tailwind가 작동중입니다
-                </div>
+            {/* 배경 */}
+            <div className="absolute inset-0 bg-white dark:bg-black"></div>
 
-                {/* 헤더 */}
-                <div className="text-center">
-                    <h1 className="text-4xl md:text-5xl font-bold mb-4 text-center text-green-500">
-                        우리나라가 사랑하는 국내주, 미국주
-                        <br />
-                        쉽고 간편하게 예측하기
-                    </h1>
-                </div>
-
-                {/* 국내 주식 섹션 */}
-                <section>
-                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6">
-                        {DOMESTIC_STOCKS.map((stock) => (
-                            <StockCard key={stock.symbol} stock={stock} onClick={onStockSelect} />
-                        ))}
+            {/* 메인 콘텐츠 */}
+            <div className="relative z-10 min-h-screen">
+                <div className="grid grid-cols-1 lg:grid-cols-5 min-h-screen">
+                    {/* 좌측 - 제목 영역 (3/5) */}
+                    <div className="lg:col-span-3 flex items-start justify-center pl-16 lg:pl-32 pr-8 lg:pr-16 pt-64">
+                        <div className="opacity-0 animate-title w-full max-w-4xl">
+                            <h1 className="text-5xl md:text-5xl lg:text-6xl font-bold leading-tight">
+                                <div className="whitespace-nowrap">
+                                    <span className="text-gray-500">우리나라가 사랑하는 </span>
+                                    <span className="text-black dark:text-white">국내주, 미국주</span>
+                                </div>
+                                <div className="mt-6 whitespace-nowrap">
+                                    <span className="text-gray-500">쉽고 간편하게 </span>
+                                    <span className="bg-gradient-to-r from-purple-500 to-green-500 bg-clip-text text-transparent">
+                            예측하기
+                        </span>
+                                </div>
+                            </h1>
+                        </div>
                     </div>
-                </section>
 
-                {/* 해외 주식 섹션 */}
-                <section>
-                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6">
-                        {INTERNATIONAL_STOCKS.map((stock) => (
-                            <StockCard key={stock.symbol} stock={stock} onClick={onStockSelect} />
-                        ))}
+                    {/* 우측 - 주식 리스트 영역 */}
+                    <div className="lg:col-span-2 flex items-start pt-24 p-8 lg:p-32">
+                        <div className="w-full space-y-8">
+                            {/* 국내 주식 섹션 */}
+                            <section>
+                                <h2 className="text-xl font-bold mb-4 text-gray-900 dark:text-white">국내 주식</h2>
+                                <div className="space-y-0">
+                                    {DOMESTIC_STOCKS.map((stock, index) => (
+                                        <StockCard key={stock.symbol} stock={stock} onClick={onStockSelect} index={index} />
+                                    ))}
+                                </div>
+                            </section>
+
+                            {/* 해외 주식 섹션 */}
+                            <section>
+                                <h2 className="text-xl font-bold mb-4 text-gray-900 dark:text-white">해외 주식</h2>
+                                <div className="space-y-0">
+                                    {INTERNATIONAL_STOCKS.map((stock, index) => (
+                                        <StockCard key={stock.symbol} stock={stock} onClick={onStockSelect} index={index + DOMESTIC_STOCKS.length} />
+                                    ))}
+                                </div>
+                            </section>
+                        </div>
                     </div>
-                </section>
+                </div>
             </div>
         </div>
     );
