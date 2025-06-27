@@ -6,7 +6,7 @@ import logging
 import traceback
 
 from config.config import Config
-from finance_prediction.App.backend.utils.validators import validate_prediction_request
+from utils.validators import validate_prediction_request
 from models.data_fetcher import DataFetcher
 from models.stock_prediction_model import StockPredictionModel
 from utils.validators import validate_stock_symbol
