@@ -1,7 +1,7 @@
 import os
-from dotenv import load_doenv
+from dotenv import load_dotenv
 
-load_doenv()
+load_dotenv()
 
 class Config:
     # Flask 설정
