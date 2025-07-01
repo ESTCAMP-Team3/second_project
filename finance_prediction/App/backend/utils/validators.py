@@ -1,6 +1,6 @@
 # 주식 심볼 유효성 체크
 def validate_stock_symbol(symbol, valid_symbols):
-    return symbol in valid_symbols
+    return symbol.upper() in valid_symbols
 
 
 #예측 요청 데이터 검증
