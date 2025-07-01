@@ -1,12 +1,12 @@
 import { useState, useCallback } from 'react';
 import { stockAPI } from '../services/stockAPI';
-import type { Period, PredictionData } from '../services/stockAPI';
+import type { PredictionData } from '../services/stockAPI';
 
 interface UseStockPredictionReturn {
     predictionData: PredictionData | null;
     loading: boolean;
     error: string | null;
-    fetchPrediction: (symbol: string, periods?: Period[]) => Promise<PredictionData>;
+    fetchPrediction: (symbol: string, days?: number) => Promise<PredictionData>;
     clearPrediction: () => void;
 }
 
@@ -15,13 +15,13 @@ export const useStockPrediction = (): UseStockPredictionReturn => {
     const [loading, setLoading] = useState<boolean>(false);
     const [error, setError] = useState<string | null>(null);
 
-    const fetchPrediction = useCallback(async (symbol: string, periods: Period[] = ['short', 'medium', 'long']) => {
+    const fetchPrediction = useCallback(async (symbol: string, days: number = 5) => {
         setLoading(true);
         setError(null);
         setPredictionData(null);
 
         try {
-            const data = await stockAPI.fetchPrediction(symbol, periods);
+            const data = await stockAPI.fetchPrediction(symbol, days);
             setPredictionData(data);
             return data;
         } catch (err) {
@@ -44,6 +44,6 @@ export const useStockPrediction = (): UseStockPredictionReturn => {
         loading,
         error,
         fetchPrediction,
-        clearPrediction
+        clearPrediction,
     };
 };

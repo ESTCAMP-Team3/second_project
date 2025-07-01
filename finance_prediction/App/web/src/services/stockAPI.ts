@@ -1,7 +1,5 @@
 const BASE_URL = 'http://localhost:5001';
 
-export type Period = 'short' | 'medium' | 'long';
-
 export interface PredictionData {
     [period: string]: {
         dates: string[];
@@ -24,7 +22,7 @@ export interface TrainModelResponse {
 export interface StockItem {
     symbol: string;
     name: string;
-    market: string;
+    type: 'domestic' | 'international'; // 수정: market → type
 }
 
 export const stockAPI = {
@@ -68,7 +66,7 @@ export const stockAPI = {
 
     async fetchPrediction(
         symbol: string,
-        periods: Period[] = ['short', 'medium', 'long']
+        days: number = 5
     ): Promise<PredictionData> {
         try {
             const response = await fetch(`${BASE_URL}/api/predict/${symbol}`, {
@@ -76,7 +74,7 @@ export const stockAPI = {
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify({ periods }),
+                body: JSON.stringify({ days }),
             });
 
             if (!response.ok) {
