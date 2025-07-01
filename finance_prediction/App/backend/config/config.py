@@ -21,19 +21,7 @@ class Config:
         'META': 'Meta Platforms',
         'GOOGL': 'Alphabet',
         'SPY': 'SPDR S&P 500 ETF',
-        'QQQ': 'Invesco QQQ Trust',
-
-        # 국내 주식 (KRX 접미사 추가)
-        '005930.KS': '삼성전자',
-        '000660.KS': 'SK하이닉스',
-        '005380.KS': '현대차',
-        '035420.KS': '네이버',
-        '035720.KS': '카카오',
-        '373220.KS': 'LG에너지솔루션',
-        '006400.KS': '삼성SDI',
-        '005490.KS': 'POSCO홀딩스',
-        '105560.KS': 'KB금융',
-        '068270.KS': '셀트리온'
+        'QQQ': 'Invesco QQQ Trust'
     }
 
     # 에측 기간

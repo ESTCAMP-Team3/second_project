@@ -14,6 +14,7 @@ class DataFetcher:
         try:
             ticker = yf.Ticker(symbol)
             data = ticker.history(period=period)
+            self.logger.info(data)
 
             if data.empty:
                 raise ValueError(f"{symbol} 해당 심볼에 해당하는 데이터를 찾을 수 없음.")
