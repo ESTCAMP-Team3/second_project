@@ -1,12 +1,30 @@
 import React from 'react';
 import StockCard from '../components/StockCard';
-import { DOMESTIC_STOCKS, INTERNATIONAL_STOCKS } from '../../constants/stocks';
+import { useStocks } from '../../hooks/useStocks';
 
 interface MainPageProps {
   onStockSelect: (stock: any) => void;
 }
 
 const MainPage: React.FC<MainPageProps> = ({ onStockSelect }) => {
+    const { domesticStocks, internationalStocks, loading, error } = useStocks();
+
+    if (loading) {
+        return (
+            <div className="min-h-screen flex items-center justify-center">
+                <div className="text-lg text-gray-600">주식 정보를 불러오는 중...</div>
+            </div>
+        );
+    }
+
+    if (error) {
+        return (
+            <div className="min-h-screen flex items-center justify-center">
+                <div className="text-lg text-red-600">오류: {error}</div>
+            </div>
+        );
+    }
+
     return (
         <div className="min-h-screen relative">
             <style>{`
@@ -57,9 +75,8 @@ const MainPage: React.FC<MainPageProps> = ({ onStockSelect }) => {
                         <div className="w-full space-y-8">
                             {/* 국내 주식 섹션 */}
                             <section>
-                                <h2 className="text-xl font-bold mb-4 text-gray-900 dark:text-white">국내 주식</h2>
                                 <div className="space-y-0">
-                                    {DOMESTIC_STOCKS.map((stock, index) => (
+                                    {domesticStocks.map((stock, index) => (
                                         <StockCard key={stock.symbol} stock={stock} onClick={onStockSelect} index={index} />
                                     ))}
                                 </div>
@@ -67,10 +84,9 @@ const MainPage: React.FC<MainPageProps> = ({ onStockSelect }) => {
 
                             {/* 해외 주식 섹션 */}
                             <section>
-                                <h2 className="text-xl font-bold mb-4 text-gray-900 dark:text-white">해외 주식</h2>
                                 <div className="space-y-0">
-                                    {INTERNATIONAL_STOCKS.map((stock, index) => (
-                                        <StockCard key={stock.symbol} stock={stock} onClick={onStockSelect} index={index + DOMESTIC_STOCKS.length} />
+                                    {internationalStocks.map((stock, index) => (
+                                        <StockCard key={stock.symbol} stock={stock} onClick={onStockSelect} index={index + domesticStocks.length} />
                                     ))}
                                 </div>
                             </section>
