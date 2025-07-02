@@ -7,6 +7,41 @@ export interface PredictionData {
     };
 }
 
+export interface ProphetPredictionData {
+    success: boolean;
+    symbol: string;
+    predictions: {
+        날짜: string;
+        예측가격: number;
+        하한가격: number;
+        상한가격: number;
+    }[];
+    model_info: {
+        training_period: string;
+        training_data_points: number;
+        prediction_days: number;
+        changepoints: number;
+        seasonalities: string[];
+    };
+    timestamp: string;
+}
+
+export interface ClusterPredictionData {
+    symbol: string;
+    predictions: {
+        date: string;
+        cluster: number;
+        entry_signal: number;
+        close: number; // 추가
+        signal_description: string;
+    }[];
+    summary: {
+        total_days: number;
+        entry_signals: number;
+        signal_ratio: number;
+    };
+}
+
 export interface TrainModelResponse {
     success: boolean;
     message?: string;
@@ -120,6 +155,98 @@ export const stockAPI = {
             }
         } catch (error) {
             console.error('Failed to train model:', error);
+            throw error;
+        }
+    },
+
+    async fetchClusterPrediction(
+        symbol: string,
+        days: number = 10
+    ): Promise<ClusterPredictionData> {
+        try {
+            const response = await fetch(`${BASE_URL}/api/cluster/predict/${symbol}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ days }),
+            });
+
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+
+            const data: {
+                success: boolean;
+                data: ClusterPredictionData;
+                error?: string;
+            } = await response.json();
+
+            if (data.success) {
+                return data.data;
+            } else {
+                throw new Error(data.error || '클러스터 예측 데이터를 불러올 수 없습니다.');
+            }
+        } catch (error) {
+            console.error('Failed to fetch cluster prediction:', error);
+            throw error;
+        }
+    },
+
+    async trainClusterModel(symbol: string): Promise<TrainModelResponse> {
+        try {
+            const response = await fetch(`${BASE_URL}/api/cluster/train/${symbol}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+            });
+
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+
+            const data: TrainModelResponse = await response.json();
+
+            if (data.success) {
+                return data;
+            } else {
+                throw new Error(data.error || '클러스터 모델 훈련에 실패했습니다.');
+            }
+        } catch (error) {
+            console.error('Failed to train cluster model:', error);
+            throw error;
+        }
+    },
+
+    async fetchProphetPrediction(
+        symbol: string,
+        days: number = 5,
+        period: string = '1y',
+        retrain: boolean = false
+    ): Promise<ProphetPredictionData> {
+        try {
+            const response = await fetch(`${BASE_URL}/api/predict/${symbol}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ days, period, retrain }),
+            });
+
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+
+            const data: ProphetPredictionData = await response.json();
+
+            if (data.success) {
+                return data;
+            } else {
+                throw new Error('Prophet 예측 데이터를 불러올 수 없습니다.');
+            }
+        } catch (error) {
+            console.error('Failed to fetch prophet prediction:', error);
             throw error;
         }
     },

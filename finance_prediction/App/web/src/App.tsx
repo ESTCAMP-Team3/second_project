@@ -4,7 +4,7 @@ import PredictionPage from './views/pages/PredictionPage';
 import ErrorMessage from './views/components/ErrorMessage';
 import Loading from './views/components/Loading';
 import { useApiConnection } from './hooks/useApiConnection';
-import type { Stock } from './constants/stocks';
+import type { Stock } from './hooks/useStocks';
 
 // 주식 데이터 상태 (타입 제거)
 const VIEWS = {
