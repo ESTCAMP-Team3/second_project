@@ -12,6 +12,13 @@ def index():
         'timestamp': datetime.now().isoformat(),
     })
 
+@base_bp.route('/health')
+def health():
+    return jsonify({
+        'status': 'healthy',
+        'timestamp': datetime.now().isoformat(),
+    })
+
 @base_bp.route('/api/stocks', methods=['GET'])
 def get_available_stocks():
     try:

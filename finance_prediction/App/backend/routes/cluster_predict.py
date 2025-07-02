@@ -36,6 +36,7 @@ def predict_cluster_signals(symbol):
                 "date": str(row["ds"].date()) if hasattr(row["ds"], 'date') else str(row["ds"]),
                 "cluster": int(row["cluster_pred"]),
                 "entry_signal": int(row["entry_signal"]),
+                "close": round(row["close"], 2),
                 "signal_description": "매수 신호" if row["entry_signal"] == 1 else "관망"
             })
 

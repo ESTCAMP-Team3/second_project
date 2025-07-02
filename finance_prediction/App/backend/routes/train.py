@@ -1,11 +1,11 @@
 from flask import Blueprint, request, jsonify, current_app
 from models.data_fetcher import DataFetcher
-from models.stock_prediction_model import StockPredictionModel
+from models.stock_prophet_prediction_model import StockProphetPredictionModel
 from utils.validators import validate_stock_symbol
 
 train_bp = Blueprint('train', __name__)
 data_fetcher = DataFetcher()
-prediction_model = StockPredictionModel()
+prediction_model = StockProphetPredictionModel()
 
 @train_bp.route('/<symbol>', methods=['POST'])
 def train_stock(symbol):

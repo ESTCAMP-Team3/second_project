@@ -29,11 +29,8 @@ class StockClusterPredictionModel:
             df.columns = df.columns.droplevel(0)
             df.columns.name = None
 
-        # yfinance typically returns: Open, High, Low, Close, Volume, Dividends, Stock Splits
-        # Only keep the required columns for technical analysis
         required_cols = ['Open', 'High', 'Low', 'Close', 'Volume']
 
-        # Map potential column names to standard names
         column_mapping = {}
         for col in df.columns:
             col_lower = col.lower()
@@ -48,7 +45,6 @@ class StockClusterPredictionModel:
             elif 'volume' in col_lower:
                 column_mapping[col] = 'Volume'
 
-        # Rename columns and keep only required ones
         df = df.rename(columns=column_mapping)
         df = df[required_cols]
 
@@ -63,6 +59,8 @@ class StockClusterPredictionModel:
         )
 
         df_ta['volatility_atr'] = np.log1p(df_ta['volatility_atr'])
+
+        self.close_prices = df['Close'].copy()
 
         X_cluster = df_ta[self.selected_features].dropna()
         return X_cluster
@@ -127,10 +125,13 @@ class StockClusterPredictionModel:
             model = self.models[symbol]
             cluster_preds = model.predict(X_scaled)
 
+            close_prices_aligned = self.close_prices.reindex(X_cluster.index).fillna(method='ffill')
+
             result = pd.DataFrame({
                 'ds': X_cluster.index,
                 'cluster_pred': cluster_preds,
-                'entry_signal': pd.Series(cluster_preds).isin(self.profitable_clusters).astype(int)
+                'entry_signal': pd.Series(cluster_preds).isin(self.profitable_clusters).astype(int),
+                'close': close_prices_aligned
             })
 
             return result.tail(days)

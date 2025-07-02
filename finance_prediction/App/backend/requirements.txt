@@ -6,3 +6,7 @@ pandas
 numpy
 requests
 prophet
+scikit-learn
+xgboost
+ta
+hdbscan

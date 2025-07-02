@@ -23,3 +23,18 @@ class DataFetcher:
         except Exception as e:
             self.logger.error(f"ERROR: {e}")
             raise
+
+    # 주식 데이터 요청 (날짜 범위 지정)
+    def fetch_stock_data(self, symbol, start_date, end_date):
+        try:
+            ticker = yf.Ticker(symbol)
+            data = ticker.history(start=start_date, end=end_date)
+            self.logger.info(f"Fetched {len(data)} data points for {symbol}")
+
+            if data.empty:
+                raise ValueError(f"{symbol} 해당 심볼에 해당하는 데이터를 찾을 수 없음.")
+
+            return data
+        except Exception as e:
+            self.logger.error(f"ERROR: {e}")
+            raise
