@@ -3,9 +3,12 @@ import numpy as np
 import logging
 import ta
 import hdbscan
+import pickle
 from sklearn.preprocessing import StandardScaler
 from xgboost import XGBClassifier
 from sklearn.model_selection import train_test_split
+from datetime import datetime
+from utils.model_utils import model_manager
 
 class StockClusterPredictionModel:
 
@@ -65,7 +68,21 @@ class StockClusterPredictionModel:
         X_cluster = df_ta[self.selected_features].dropna()
         return X_cluster
 
-    def train_model(self, symbol, data):
+    def train_model(self, symbol, data, force_retrain: bool = False):
+        # 기존 모델 존재 확인
+        if not force_retrain:
+            existing_model_path = model_manager.get_existing_model_path("cluster", symbol)
+            if existing_model_path:
+                try:
+                    with open(existing_model_path, 'rb') as f:
+                        saved_data = pickle.load(f)
+                    self.models[symbol] = saved_data['model']
+                    self.scaler = saved_data['scaler']
+                    self.logger.info(f"[{symbol}] 기존 클러스터 모델 로드 완료: {existing_model_path}")
+                    return
+                except Exception as e:
+                    self.logger.warning(f"[{symbol}] 기존 모델 로드 실패: {e}, 새로 학습합니다.")
+        
         try:
             if data.index.tz is not None:
                 data.index = data.index.tz_convert("UTC").tz_localize(None)
@@ -100,7 +117,33 @@ class StockClusterPredictionModel:
             model.fit(X_train, y_train)
 
             self.models[symbol] = model
-            self.logger.info(f"[{symbol}] 클러스터 모델 학습 완료")
+            
+            # 모델과 스케일러 파일로 저장
+            model_path = model_manager.get_model_path("cluster", symbol)
+            model_data = {
+                'model': model,
+                'scaler': self.scaler,
+                'selected_features': self.selected_features,
+                'profitable_clusters': self.profitable_clusters
+            }
+            with open(model_path, 'wb') as f:
+                pickle.dump(model_data, f)
+            
+            # 메타데이터 저장
+            metadata = {
+                'symbol': symbol,
+                'model_type': 'cluster',
+                'training_date': datetime.now().isoformat(),
+                'data_points': len(X_cluster),
+                'features': self.selected_features,
+                'profitable_clusters': self.profitable_clusters
+            }
+            model_manager.save_model_metadata("cluster", symbol, metadata)
+            
+            # 오래된 모델 정리
+            model_manager.cleanup_old_models("cluster", symbol)
+            
+            self.logger.info(f"[{symbol}] 클러스터 모델 학습 및 저장 완료")
         except Exception as e:
             self.logger.error(f"[{symbol}] 모델 학습 실패: {e}")
             raise

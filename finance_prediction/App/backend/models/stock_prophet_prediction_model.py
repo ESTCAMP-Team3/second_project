@@ -1,7 +1,10 @@
 import pandas as pd
 import logging
+import pickle
 from prophet import Prophet
 from typing import Optional
+from datetime import datetime
+from utils.model_utils import model_manager
 
 
 class StockProphetPredictionModel:
@@ -51,13 +54,14 @@ class StockProphetPredictionModel:
 
         return df
 
-    def train_model(self, symbol: str, data: pd.DataFrame) -> None:
+    def train_model(self, symbol: str, data: pd.DataFrame, force_retrain: bool = False) -> None:
         """
         특정 주식 심볼에 대한 Prophet 모델 학습
 
         Args:
             symbol (str): 주식 심볼 (예: 'AAPL', 'GOOGL')
             data (pd.DataFrame): 학습용 주식 데이터
+            force_retrain (bool): 강제 재학습 여부 (기본값: False)
 
         Raises:
             Exception: 모델 학습 중 오류 발생 시
@@ -67,6 +71,19 @@ class StockProphetPredictionModel:
             - weekly_seasonality=True: 주별 계절성 패턴 고려 (기본값)
             - yearly_seasonality=True: 연별 계절성 패턴 고려 (기본값)
         """
+        # 기존 모델 존재 확인
+        if not force_retrain:
+            existing_model_path = model_manager.get_existing_model_path("prophet", symbol)
+            if existing_model_path:
+                try:
+                    with open(existing_model_path, 'rb') as f:
+                        model = pickle.load(f)
+                    self.models[symbol] = model
+                    self.logger.info(f"[{symbol}] 기존 모델 로드 완료: {existing_model_path}")
+                    return
+                except Exception as e:
+                    self.logger.warning(f"[{symbol}] 기존 모델 로드 실패: {e}, 새로 학습합니다.")
+        
         try:
             # 데이터 인덱스의 타임존 처리
             if hasattr(data.index, 'tz') and data.index.tz is not None:
@@ -91,7 +108,32 @@ class StockProphetPredictionModel:
             # 학습된 모델을 딕셔너리에 저장
             self.models[symbol] = model
 
-            self.logger.info(f"[{symbol}] 모델 학습 완료 (데이터 포인트: {len(df)}개)")
+            # 모델 파일로 저장
+            model_path = model_manager.get_model_path("prophet", symbol)
+            with open(model_path, 'wb') as f:
+                pickle.dump(model, f)
+            
+            # 메타데이터 저장
+            metadata = {
+                'symbol': symbol,
+                'model_type': 'prophet',
+                'training_date': datetime.now().isoformat(),
+                'data_points': len(df),
+                'parameters': {
+                    'daily_seasonality': True,
+                    'weekly_seasonality': True,
+                    'yearly_seasonality': True,
+                    'seasonality_mode': 'multiplicative',
+                    'changepoint_prior_scale': 0.05,
+                    'seasonality_prior_scale': 10.0
+                }
+            }
+            model_manager.save_model_metadata("prophet", symbol, metadata)
+            
+            # 오래된 모델 정리
+            model_manager.cleanup_old_models("prophet", symbol)
+
+            self.logger.info(f"[{symbol}] 모델 학습 및 저장 완료 (데이터 포인트: {len(df)}개)")
 
         except Exception as e:
             self.logger.error(f"[{symbol}] 모델 학습 실패: {e}")

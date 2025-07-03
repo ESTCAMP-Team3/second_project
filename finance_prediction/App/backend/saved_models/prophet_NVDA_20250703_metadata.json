@@ -1,0 +1,14 @@
+{
+  "symbol": "NVDA",
+  "model_type": "prophet",
+  "training_date": "2025-07-03T16:11:15.917885",
+  "data_points": 1255,
+  "parameters": {
+    "daily_seasonality": true,
+    "weekly_seasonality": true,
+    "yearly_seasonality": true,
+    "seasonality_mode": "multiplicative",
+    "changepoint_prior_scale": 0.05,
+    "seasonality_prior_scale": 10.0
+  }
+}
