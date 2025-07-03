@@ -26,7 +26,7 @@ export const useApiConnection = (): ApiConnectionStatus => {
 
         checkConnection();
 
-        const interval = setInterval(checkConnection, 30000);
+        const interval = setInterval(checkConnection, 86400000);
 
         return () => clearInterval(interval);
     }, []);

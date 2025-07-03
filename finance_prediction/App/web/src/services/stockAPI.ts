@@ -26,6 +26,26 @@ export interface ProphetPredictionData {
     timestamp: string;
 }
 
+export interface LSTMPredictionData {
+    success: boolean;
+    symbol: string;
+    predictions: {
+        날짜: string;
+        예측가격: number;
+    }[];
+    model_info: {
+        model_type: string;
+        training_period: string;
+        training_data_points: number;
+        prediction_days: number;
+        top_features: string[];
+        window_size: number;
+        lstm_units: number;
+        dropout_rate: number;
+    };
+    timestamp: string;
+}
+
 export interface ClusterPredictionData {
     symbol: string;
     predictions: {
@@ -247,6 +267,69 @@ export const stockAPI = {
             }
         } catch (error) {
             console.error('Failed to fetch prophet prediction:', error);
+            throw error;
+        }
+    },
+
+    async fetchLSTMPrediction(
+        symbol: string,
+        days: number = 5,
+        period: string = '1y',
+        retrain: boolean = false
+    ): Promise<LSTMPredictionData> {
+        try {
+            const response = await fetch(`${BASE_URL}/api/lstm/predict/${symbol}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ days, period, retrain }),
+            });
+
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+
+            const data: LSTMPredictionData = await response.json();
+
+            if (data.success) {
+                return data;
+            } else {
+                throw new Error('LSTM 예측 데이터를 불러올 수 없습니다.');
+            }
+        } catch (error) {
+            console.error('Failed to fetch LSTM prediction:', error);
+            throw error;
+        }
+    },
+
+    async trainLSTMModel(
+        symbol: string,
+        period: string = '1y',
+        force_retrain: boolean = false
+    ): Promise<TrainModelResponse> {
+        try {
+            const response = await fetch(`${BASE_URL}/api/lstm/train/${symbol}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ period, force_retrain }),
+            });
+
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+
+            const data: TrainModelResponse = await response.json();
+
+            if (data.success) {
+                return data;
+            } else {
+                throw new Error(data.error || 'LSTM 모델 훈련에 실패했습니다.');
+            }
+        } catch (error) {
+            console.error('Failed to train LSTM model:', error);
             throw error;
         }
     },
